@@ -1,9 +1,12 @@
+from black import color_diff
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd 
 from matplotlib import pyplot as plt
 from plotly import graph_objs as go
 import numpy as np 
 import time
+# import seaborn as plt
 from sklearn.model_selection import train_test_split
 
 from sklearn.linear_model import LinearRegression
@@ -14,43 +17,122 @@ import joblib
 
 
 data = pd.read_csv("insurance.csv")
-data['sex']=data['sex'].map({'female':0,'male':1})
-data['medical']=data['medical'].map({'yes':1,'no':0})
-data['region']=data['region'].map({'southeast':2,'southwest':1,'northeast':4,'northwest':3})
-
-
-X= data.drop(['charges'],axis=1)
-Y=data['charges']
 
 
 st.title("Medical Insurance Cost Predictor")
 st.image("https://miro.medium.com/max/700/1*WoVYSG5nZbErqzgy47tWBQ.jpeg",width = 450)
 nav = st.sidebar.radio("Navigation",["Home","Prediction","Contribute"])
 if nav == "Home":
+    st.header("Know Our Dataset")
+    if st.checkbox("Show Dataset"):
+        st.dataframe(data)
     
-    if st.checkbox("Show Table"):
-        st.table(data)
-    
-    graph = st.selectbox("What kind of Graph ? ",["Non-Interactive","Interactive"])
+    graph = st.selectbox("Select",["Numeric","Graphic"])
+    value = st.selectbox("Select Column",["Age","Gender","BMI","Children","Smoker","Region","Charges"])
+    if graph == "Numeric":
+        if value == "Age":
+            a = data['age'].value_counts()
+            st.table(a)
+        elif value == "Gender":
+            b = data['gender'].value_counts()
+            st.table(b)
+        elif value == "BMI":
+            c = data['bmi'].value_counts()
+            st.table(c)
+        elif value == "Children":
+            d = data['children'].value_counts()
+            st.table(d)
+        elif value == "Smoker":
+            e = data['smoker'].value_counts()
+            st.table(e)
+        elif value == "Region":
+            f = data['region'].value_counts()
+            st.table(f)
+        else:
+            g = data['charges']
+            st.table(g)
+    if graph == "Graphic":
+        if value == "Age":
+            # Distribution of age value
+            plt.figure(figsize=(6,6))
+            arr = data['age']
+            fig, ax = plt.subplots()
+            ax.hist(arr, bins=20)
+            plt.title('Age Distribution')
+            plt.xlabel('Age')
+            plt.ylabel('Density')
+            st.pyplot(fig)        
+        elif value == "Gender":
+            # Gender column
+            plt.figure(figsize=(6,6))
+            arr = data['gender']
+            fig, ax = plt.subplots()
+            ax.hist(arr, bins='scott',color='green')
+            plt.title('Gender Distribution')
+            plt.xlabel('Gender')
+            plt.ylabel('Density')
+            st.pyplot(fig) 
+            
+        elif value == "BMI":
+            # BMI distribution
+            # Normal BMI range --> 18.5 to 24.9
+            plt.figure(figsize=(6,6))
+            arr = data['bmi']
+            fig, ax = plt.subplots()
+            ax.hist(arr, bins=20,color='grey')
+            plt.title('BMI Distribution')
+            plt.xlabel('BMI')
+            plt.ylabel('Density')
+            st.pyplot(fig) 
+        elif value == "Children":
+            # Childern column
+            plt.figure(figsize=(6,6))
+            arr = data['children']
+            fig, ax = plt.subplots()
+            ax.hist(arr, bins='sturges',color='orange')
+            plt.title('Children Distribution')
+            plt.xlabel('Children')
+            plt.ylabel('Density')
+            st.pyplot(fig) 
+        elif value == "Smoker":
+            # Smoker column
+            plt.figure(figsize=(6,6))
+            arr = data['smoker']
+            fig, ax = plt.subplots()
+            ax.hist(arr, bins='scott',color='purple')
+            plt.title('Smoker Distribution')
+            plt.xlabel('Smoker')
+            plt.ylabel('Density')
+            st.pyplot(fig) 
+        elif value == "Region":
+            # Region distribution
+            plt.figure(figsize=(6,6))
+            arr = data['region']
+            fig, ax = plt.subplots()
+            ax.hist(arr, bins='scott')
+            plt.title('Region Distribution')
+            plt.xlabel('Region')
+            plt.ylabel('Density')
+            st.pyplot(fig) 
+        else:
+            # Distribution of charge value
+            plt.figure(figsize=(6,6))
+            arr = data['charges']
+            fig, ax = plt.subplots()
+            ax.hist(arr,bins=[2500,5000,7500,10000,12500,15000,17500,20000,22500,25000,27500,30000,32500,35000,37500,40000,42500,45000,47500,50000])
+            plt.title('Price Distribution')
+            plt.xlabel('Charges')
+            plt.ylabel('Density')
+            st.pyplot(fig) 
 
-    val = st.slider("Filter data using years",0,20)
-    data = data.loc[data["children"]>= val]
-    if graph == "Non-Interactive":
-        plt.figure(figsize = (10,5))
-        plt.scatter(data["children"],data["charges"])
-        plt.ylim(0)
-        plt.xlabel("Years of Experience")
-        plt.ylabel("charges")
-        plt.tight_layout()
-        st.pyplot()
-    if graph == "Interactive":
-        layout =go.Layout(
-            xaxis = dict(range=[0,16]),
-            yaxis = dict(range =[0,210000])
-        )
-        fig = go.Figure(data=go.Scatter(x=data["children"], y=data["charges"], mode='markers'),layout = layout)
-        st.plotly_chart(fig)
-    
+data['gender']=data['gender'].map({'female':0,'male':1})
+data['smoker']=data['smoker'].map({'yes':1,'no':0})
+data['region']=data['region'].map({'southeast':2,'southwest':1,'northeast':4,'northwest':3})
+
+
+X= data.drop(['charges'],axis=1)
+Y=data['charges']
+
 if nav == "Prediction":
     st.header("Know Medical Insurance Cost")
     age = st.number_input("Enter your Age",0.0,100.0,step=0.25)
@@ -82,7 +164,7 @@ if nav == "Prediction":
     else:
         area = 3
 
-    data = {'age':age,'sex':ling,'bmi':bmi,'children':child,'medical':medi,'region':area}
+    data = {'age':age,'gender':ling,'bmi':bmi,'children':child,'smoker':medi,'region':area}
     df = pd.DataFrame(data,index=[0])
 
     gr = GradientBoostingRegressor()
@@ -96,7 +178,7 @@ if nav == "Prediction":
     # pred =model.predict(val)[0]
 
     if st.button("Predict"):
-        st.success(f"Predicted Medical Insuurance Cost is : {pred} ")
+        st.success(f"Predicted smoker Insuurance Cost is : {pred} ")
 
 if nav == "Contribute":
     st.header("Contribute to our dataset")
@@ -115,7 +197,7 @@ if nav == "Contribute":
             for i in range(100):
                 time.sleep(0.02)
                 prg.progress(i+1)
-            to_add = {"age":[age],"sex":[gen],"bmi":[bmi],"children":[child],"medical":[med],"region":[reg],"charges":[sal]}
+            to_add = {"age":[age],"gender":[gen],"bmi":[bmi],"children":[child],"smoker":[med],"region":[reg],"charges":[sal]}
             to_add = pd.DataFrame(to_add)
             to_add.to_csv("insurance.csv",mode='a',header = False,index= False)
             st.success("Submitted")
@@ -167,3 +249,26 @@ if nav == "Contribute":
 # plt.legend()
 
 # plt.tight_layout()
+
+
+
+
+# components.html(
+#     """
+#     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+#     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+#     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+#     <script><div id="accordion">
+#        function setalert(){
+#             <div class="alert alert-success" role="alert">
+#                 A simple success alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
+#             </div>;
+#         setTimeout(() => {
+#             setAlert(null);
+#         }, 1500);
+#         }
+#     </div>
+#     </script>
+#     """,
+#     height=600,
+# )

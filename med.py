@@ -103,8 +103,8 @@ if nav == "Contribute":
     with st.form(key="my_form" , clear_on_submit=True):
         age = st.number_input("Enter your Age",0.0,100.0,step=0.25)
         gen = st.radio("Select your Gender",["male","female"])
-        bmi = st.number_input("Enter your BMI",0.0,50.0)
-        child = st.number_input("Enter number of Children",0.0,20.0)
+        bmi = st.number_input("Enter your BMI",0.0,50.0,step=0.25)
+        child = st.number_input("Enter number of Children",0,5,step= 1)
         med = st.radio("Are you a Smoker?",["yes","no"])
         reg = st.radio("Select your Region",["northwest","northeast","southeast","southwest"])
         sal = st.number_input("Enter Insurance Cost",0.0,1000000.0,step = 1000.0)

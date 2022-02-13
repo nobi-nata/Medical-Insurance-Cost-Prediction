@@ -178,7 +178,7 @@ if nav == "Prediction":
     # pred =model.predict(val)[0]
 
     if st.button("Predict"):
-        st.success(f"Predicted smoker Insuurance Cost is : {pred} ")
+        st.success(f"Predicted Medical Insurance Cost is : {pred} ")
 
 if nav == "Contribute":
     st.header("Contribute to our dataset")

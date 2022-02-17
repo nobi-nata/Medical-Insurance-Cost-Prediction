@@ -1,6 +1,4 @@
-from black import color_diff
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd 
 from matplotlib import pyplot as plt
 from plotly import graph_objs as go
@@ -10,13 +8,10 @@ import time
 from sklearn.model_selection import train_test_split
 
 from sklearn.linear_model import LinearRegression
-from sklearn.svm import SVR
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.ensemble import GradientBoostingRegressor
-import joblib
 
 
 data = pd.read_csv("insurance.csv")
+md_df =pd.read_csv("medical report.csv")
 
 
 st.title("Medical Insurance Cost Predictor")
@@ -28,7 +23,7 @@ if nav == "Home":
         st.dataframe(data)
     
     graph = st.selectbox("Select",["Numeric","Graphic"])
-    value = st.selectbox("Select Column",["Age","Gender","BMI","Children","Smoker","Region","Charges"])
+    value = st.selectbox("Select Column",["Age","Gender","BMI","Children","Medical-Report","Region","Charges"])
     if graph == "Numeric":
         if value == "Age":
             a = data['age'].value_counts()
@@ -42,8 +37,8 @@ if nav == "Home":
         elif value == "Children":
             d = data['children'].value_counts()
             st.table(d)
-        elif value == "Smoker":
-            e = data['smoker'].value_counts()
+        elif value == "Medical":
+            e = data['medical'].value_counts()
             st.table(e)
         elif value == "Region":
             f = data['region'].value_counts()
@@ -57,7 +52,7 @@ if nav == "Home":
             plt.figure(figsize=(6,6))
             arr = data['age']
             fig, ax = plt.subplots()
-            ax.hist(arr, bins=20)
+            ax.hist(arr, bins="fd")
             plt.title('Age Distribution')
             plt.xlabel('Age')
             plt.ylabel('Density')
@@ -94,14 +89,14 @@ if nav == "Home":
             plt.xlabel('Children')
             plt.ylabel('Density')
             st.pyplot(fig) 
-        elif value == "Smoker":
-            # Smoker column
+        elif value == "Medical-Report":
+            # Medical-Report column
             plt.figure(figsize=(6,6))
-            arr = data['smoker']
+            arr = data['medical']
             fig, ax = plt.subplots()
             ax.hist(arr, bins='scott',color='purple')
-            plt.title('Smoker Distribution')
-            plt.xlabel('Smoker')
+            plt.title('Medical-Report Distribution')
+            plt.xlabel('Medical-Report')
             plt.ylabel('Density')
             st.pyplot(fig) 
         elif value == "Region":
@@ -123,37 +118,63 @@ if nav == "Home":
             plt.title('Price Distribution')
             plt.xlabel('Charges')
             plt.ylabel('Density')
-            st.pyplot(fig) 
+            st.pyplot(fig)
 
 data['gender']=data['gender'].map({'female':0,'male':1})
-data['smoker']=data['smoker'].map({'yes':1,'no':0})
+data['medical']=data['medical'].map({'yes':1,'no':0})
 data['region']=data['region'].map({'southeast':2,'southwest':1,'northeast':4,'northwest':3})
+
+
+
+from sklearn.preprocessing import LabelEncoder
+# Creating a instance of label Encoder.
+le = LabelEncoder()
+label1 = le.fit_transform(md_df['gender'])
+md_df.drop("gender",axis=1,inplace=True)
+md_df["gender"]=label1
+label2 = le.fit_transform(md_df['blood sugar'])
+md_df.drop("blood sugar",axis=1,inplace=True)
+md_df["blood sugar"]=label2
+
+label3 = le.fit_transform(md_df['bone fracture'])
+md_df.drop("bone fracture",axis=1,inplace=True)
+md_df["bone fracture"]=label3
+
+md_df['bone fracture'] = md_df['bone fracture'].astype(pd.Int64Dtype()) 
+
+X1 = md_df.drop(['Target'],axis=1)
+y1 = md_df['Target']
+
 
 
 X= data.drop(['charges'],axis=1)
 Y=data['charges']
 
 if nav == "Prediction":
+
     st.header("Know Medical Insurance Cost")
-    age = st.number_input("Enter your Age",0.0,100.0,step=0.25)
+    age = st.number_input("Enter your Age",1.0,100.0,step=1.0)
     gen = st.radio("Select your Gender",["male","female"])
     bmi = st.number_input("Enter your BMI",0.0,50.0)
     child = st.number_input("Enter number of Children",0.0,20.0)
-    med = st.radio("Are you a Smoker?",["yes","no"])
-    reg = st.radio("Select your Region",["northwest","northeast","southeast","southwest"])    
-    
+    reg = st.radio("Select your Region",["northwest","northeast","southeast","southwest"]) 
     
 
+    st.subheader("Enter your Medical-details")
+    sur = st.number_input("Number of Surgeries",0.0,10.0,step=1.0)
+    bp = st.number_input("Blood Pressure",50.0,200.0,step=0.5)
+    col = st.number_input("Colestrol",100.0,300.0,step=1.0)
+    bs = st.radio("Blood Sugar",["no","yes"])
+    ecg = st.radio("ECG",["no","yes"])
+    mhr = st.number_input("Max. Heart Rate",100.0,200.0,step=1.0)
+    bf = st.radio("Bone Fracture",["no","yes"])
     
-    if gen == 'female':
-        ling = 0
-    else:
+    if gen == 'male':
         ling = 1
-
-    if med == 'yes':
-        medi = 1
     else:
-        medi = 0
+        ling = 0
+
+    
 
     if reg == 'southeast':
         area = 2
@@ -164,111 +185,110 @@ if nav == "Prediction":
     else:
         area = 3
 
-    data = {'age':age,'gender':ling,'bmi':bmi,'children':child,'smoker':medi,'region':area}
-    df = pd.DataFrame(data,index=[0])
+    if bs == 'yes':
+        blsr = 1
+    else:
+        blsr = 0
+    if ecg == 'yes':
+        eecg = 1
+    else:
+        eecg = 0
+    if bf == 'yes':
+        bofr = 1
+    else:
+        bofr = 0
+    
+    data1 = (age,ling,sur,bp,col,blsr,eecg,mhr,bofr)
 
-    gr = GradientBoostingRegressor()
-    gr.fit(X,Y)
+    from sklearn.linear_model import LogisticRegression
+    LR =LogisticRegression(C=0.01,solver='liblinear').fit(X1,y1)
+    #changing input_data into numpy array
+    input_data_as_numpyArray1 = np.asarray(data1)
+    # reshape the array
+    input_data_reshaped1 = input_data_as_numpyArray1.reshape(1,-1)
+    med = LR.predict(input_data_reshaped1)
+    if st.button("Check"):
+        if med == 0:
+            st.success("You are Medically Unfit")
+        else:
+            st.success("You are Medically Fit")
 
-    joblib.dump(gr,'model_joblib_gr')
-    model = joblib.load('model_joblib_gr')
-    pred = model.predict(df)
-
-    # val = np.array(val).reshape(1,-1)
-    # pred =model.predict(val)[0]
+    if med == 1:
+        medi = 1
+    else:
+        medi = 0
+    
+    
+    data = (age,ling,bmi,child,medi,area)
+    regressor = LinearRegression()
+    regressor.fit(X,Y)
+    #changing input_data into numpy array
+    input_data_as_numpyArray = np.asarray(data)
+    # reshape the array
+    input_data_reshaped = input_data_as_numpyArray.reshape(1,-1)
+    # df = pd.DataFrame(input_data_reshaped,index=[0])
+    prediction = regressor.predict(input_data_reshaped)
+    
 
     if st.button("Predict"):
-        st.success(f"Predicted Medical Insurance Cost is : {pred} ")
+        st.success(f"Predicted Medical Insurance Cost is : {prediction[0]} ")
 
 if nav == "Contribute":
     st.header("Contribute to our dataset")
-    with st.form(key="my_form" , clear_on_submit=True):
-        age = st.number_input("Enter your Age",0.0,100.0,step=0.25)
-        gen = st.radio("Select your Gender",["male","female"])
-        bmi = st.number_input("Enter your BMI",0.0,50.0,step=0.25)
-        child = st.number_input("Enter number of Children",0,5,step= 1)
-        med = st.radio("Are you a Smoker?",["yes","no"])
-        reg = st.radio("Select your Region",["northwest","northeast","southeast","southwest"])
-        sal = st.number_input("Enter Insurance Cost",0.0,1000000.0,step = 1000.0)
-        sub = st.form_submit_button("Submit")
+    dataset = st.selectbox("Select the dataset",["Medical-Report","Medical-Insurance"])
+    if dataset == "Medical-Report":
+        with st.form(key="my_form" , clear_on_submit=True):
+            age = st.number_input("Enter your Age",1.0,100.0,step=1.0)
+            gen = st.radio("Select your Gender",["male","female"])
+            sur = st.number_input("Number of Surgeries",0.0,10.0,step=1.0)
+            bp = st.number_input("Blood Pressure",50.0,200.0,step=0.5)
+            col = st.number_input("Colestrol",100.0,200.0,step=1.0)
+            bs = st.radio("Blood Sugar",["no","yes"])
+            ecg = st.radio("ECG",["no","yes"])
+            mhr = st.number_input("Max. Heart Rate",100.0,200.0,step=1.0)
+            bf = st.radio("Bone Fracture",["no","yes"])
+            sal = st.radio("Healthy",["yes","no"])
+            if sal == "yes":
+                tar = 1
+            else:
+                tar = 0
 
-        if sub:
-            prg = st.progress(0)
-            for i in range(100):
-                time.sleep(0.02)
-                prg.progress(i+1)
-            to_add = {"age":[age],"gender":[gen],"bmi":[bmi],"children":[child],"smoker":[med],"region":[reg],"charges":[sal]}
-            to_add = pd.DataFrame(to_add)
-            to_add.to_csv("insurance.csv",mode='a',header = False,index= False)
-            st.success("Submitted")
+            sub = st.form_submit_button("Submit")
+
+            if sub:
+                prg = st.progress(0)
+                for i in range(100):
+                    time.sleep(0.02)
+                    prg.progress(i+1)
+                to_add = {"age":[age],"gender":[gen],"no. of surgeries":[sur],"blood pressure":[bp],"cholestrol":[col],"blood sugar":[bs],"ecg":[ecg],"max. heart rate":[mhr],"bone fracture":[bf],"Target":[tar]}
+                to_add = pd.DataFrame(to_add)
+                to_add.to_csv("medical report.csv",mode='a',header = False,index= False)
+                st.success("Submitted")
+    
+    if dataset == "Medical-Insurance":
+    
+        with st.form(key="my_form" , clear_on_submit=True):
+            age = st.number_input("Enter your Age",0.0,100.0,step=1.0)
+            gen = st.radio("Select your Gender",["male","female"])
+            bmi = st.number_input("Enter your BMI",0.0,50.0,step=0.25)
+            child = st.number_input("Enter number of Children",0,5,step= 1)
+            med = st.radio("Are you a Medically-Fit?",["yes","no"])
+            reg = st.radio("Select your Region",["northwest","northeast","southeast","southwest"])
+            sal = st.number_input("Enter Insurance Cost",0.0,1000000.0,step = 1000.0)
+            sub = st.form_submit_button("Submit")
+
+            if sub:
+                prg = st.progress(0)
+                for i in range(100):
+                    time.sleep(0.02)
+                    prg.progress(i+1)
+                to_add = {"age":[age],"gender":[gen],"bmi":[bmi],"children":[child],"medical":[med],"region":[reg],"charges":[sal]}
+                to_add = pd.DataFrame(to_add)
+                to_add.to_csv("insurance.csv",mode='a',header = False,index= False)
+                st.success("Submitted")
             
            
 
 
 
 
-
-# x = np.array(data['children']).reshape(-1,1)
-# lr = LinearRegression()
-# lr.fit(x,np.array(data['charges']))
-
-# X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=0.2,random_state=42)
-# lr = LinearRegression()
-# lr.fit(X_train,Y_train)
-# svm = SVR()
-# svm.fit(X_train,Y_train)
-# rf = RandomForestRegressor()
-# rf.fit(X_train,Y_train)
-# gr = GradientBoostingRegressor()
-# gr.fit(X_train,Y_train)
-# Y_pred1 = lr.predict(X_test)
-# Y_pred2 = svm.predict(X_test)
-# Y_pred3 = rf.predict(X_test)
-# Y_pred4 = gr.predict(X_test)
-
-# df1 = pd.DataFrame({'Actual':Y_test,'Lr':Y_pred1,'svm':Y_pred2,'rf':Y_pred3,'gr':Y_pred4})
-
-# plt.subplot(221)
-# plt.plot(df1['Actual'].iloc[0:11],label='Actual')
-# plt.plot(df1['Lr'].iloc[0:11],label='Lr')
-# plt.legend()
-
-# plt.subplot(222)
-# plt.plot(df1['Actual'].iloc[0:11],label='Actual')
-# plt.plot(df1['svm'].iloc[0:11],label='svr')
-# plt.legend()
-
-# plt.subplot(223)
-# plt.plot(df1['Actual'].iloc[0:11],label='Actual')
-# plt.plot(df1['rf'].iloc[0:11],label='rf')
-# plt.legend()
-
-# plt.subplot(224)
-# plt.plot(df1['Actual'].iloc[0:11],label='Actual')
-# plt.plot(df1['gr'].iloc[0:11],label='gr')
-# plt.legend()
-
-# plt.tight_layout()
-
-
-
-
-# components.html(
-#     """
-#     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-#     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-#     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-#     <script><div id="accordion">
-#        function setalert(){
-#             <div class="alert alert-success" role="alert">
-#                 A simple success alert with <a href="#" class="alert-link">an example link</a>. Give it a click if you like.
-#             </div>;
-#         setTimeout(() => {
-#             setAlert(null);
-#         }, 1500);
-#         }
-#     </div>
-#     </script>
-#     """,
-#     height=600,
-# )

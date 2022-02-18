@@ -14,7 +14,7 @@ st.title("Medical Insurance Cost Predictor")
 st.image("https://miro.medium.com/max/700/1*WoVYSG5nZbErqzgy47tWBQ.jpeg",width = 450)
 nav = st.sidebar.radio("Navigation",["Home","Prediction","Contribute"])
 
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, binarize
 le = LabelEncoder()
 label2 = le.fit_transform(md_df['blood sugar'])
 md_df.drop("blood sugar",axis=1,inplace=True)
@@ -30,7 +30,7 @@ if nav == "Home":
         if st.checkbox("Show Dataset"):
             st.dataframe(data)
         graph = st.selectbox("Select Type",["Numeric","Graphic"])
-        value = st.selectbox("Select Column",["Age","Gender","BMI","Children","Medical-Report","Region","Charges"])
+        value = st.selectbox("Select Column",["Age","Gender","BMI","Children","Medical","Region","Charges"])
         if graph == "Numeric":
             if value == "Age":
                 a = data['age'].value_counts()
@@ -59,7 +59,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = data['age']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins="fd")
+                ax.hist(arr,bins=[10,20,30,40,50,60,70],rwidth=0.8)
                 plt.title('Age Distribution')
                 plt.xlabel('Age')
                 plt.ylabel('Density')
@@ -69,7 +69,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = data['gender']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott',color='green')
+                ax.hist(arr, bins='scott',color='green',align="mid",rwidth=0.8)
                 plt.title('Gender Distribution')
                 plt.xlabel('Gender')
                 plt.ylabel('Density')
@@ -81,7 +81,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = data['bmi']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins=20,color='grey')
+                ax.hist(arr, bins=20,color='grey',rwidth=0.8)
                 plt.title('BMI Distribution')
                 plt.xlabel('BMI')
                 plt.ylabel('Density')
@@ -91,19 +91,19 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = data['children']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='sturges',color='orange')
+                ax.hist(arr, bins='sturges',color='orange',rwidth=0.8)
                 plt.title('Children Distribution')
                 plt.xlabel('Children')
                 plt.ylabel('Density')
                 st.pyplot(fig) 
-            elif value == "Medical-Report":
+            elif value == "Medical":
                 # Medical-Report column
                 plt.figure(figsize=(6,6))
                 arr = data['medical']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott',color='purple')
-                plt.title('Medical-Report Distribution')
-                plt.xlabel('Medical-Report')
+                ax.hist(arr, bins='scott',color='purple',rwidth=0.8)
+                plt.title('Medical Distribution')
+                plt.xlabel('Medical')
                 plt.ylabel('Density')
                 st.pyplot(fig) 
             elif value == "Region":
@@ -111,7 +111,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = data['region']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott')
+                ax.hist(arr, bins='scott',rwidth=0.8)
                 plt.title('Region Distribution')
                 plt.xlabel('Region')
                 plt.ylabel('Density')
@@ -121,7 +121,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = data['charges']
                 fig, ax = plt.subplots()
-                ax.hist(arr,bins=[2500,5000,7500,10000,12500,15000,17500,20000,22500,25000,27500,30000,32500,35000,37500,40000,42500,45000,47500,50000])
+                ax.hist(arr,bins=[2500,5000,7500,10000,12500,15000,17500,20000,22500,25000,27500,30000,32500,35000,37500,40000,42500,45000,47500,50000],rwidth=0.8)
                 plt.title('Price Distribution')
                 plt.xlabel('Charges')
                 plt.ylabel('Density')
@@ -170,7 +170,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['age']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins="fd")
+                ax.hist(arr, bins="fd",rwidth=0.8)
                 plt.title('Age Distribution')
                 plt.xlabel('Age')
                 plt.ylabel('Density')
@@ -180,7 +180,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['gender']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott',color='green')
+                ax.hist(arr, bins='scott',color='green',rwidth=0.8)
                 plt.title('Gender Distribution')
                 plt.xlabel('Gender')
                 plt.ylabel('Density')
@@ -192,7 +192,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['no. of surgeries']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins=20,color='grey')
+                ax.hist(arr, bins="auto",color='grey',rwidth=1.2,align="mid")
                 plt.title('Surgeries Distribution')
                 plt.xlabel('Surgeries')
                 plt.ylabel('Density')
@@ -202,7 +202,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['blood pressure']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='sturges',color='orange')
+                ax.hist(arr, bins='sturges',color='orange',rwidth=0.8)
                 plt.title('Blood Pressure Distribution')
                 plt.xlabel('Blood Pressure')
                 plt.ylabel('Density')
@@ -212,7 +212,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['cholestrol']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott',color='purple')
+                ax.hist(arr, bins='scott',color='purple',rwidth=0.8)
                 plt.title('Cholestrol Distribution')
                 plt.xlabel('Cholestrol')
                 plt.ylabel('Density')
@@ -222,7 +222,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['blood sugar']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott')
+                ax.hist(arr, range=(0,1),rwidth=1.2)
                 plt.title('Blood Sugar Distribution')
                 plt.xlabel('Blood Sugar')
                 plt.ylabel('Density')
@@ -232,7 +232,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['ecg']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott')
+                ax.hist(arr,range=(0,1),rwidth=1.2)
                 plt.title('ECG Distribution')
                 plt.xlabel('ECG')
                 plt.ylabel('Density')
@@ -242,7 +242,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['max. heart rate']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott')
+                ax.hist(arr, bins='scott',rwidth=0.8)
                 plt.title('Heart Rate Distribution')
                 plt.xlabel('Heart Rate')
                 plt.ylabel('Density')
@@ -252,7 +252,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['bone fracture']
                 fig, ax = plt.subplots()
-                ax.hist(arr, bins='scott')
+                ax.hist(arr, bins='scott',rwidth=0.8)
                 plt.title('Bone Fracture Distribution')
                 plt.xlabel('Bone Fracture')
                 plt.ylabel('Density')
@@ -262,7 +262,7 @@ if nav == "Home":
                 plt.figure(figsize=(6,6))
                 arr = md_df['Target']
                 fig, ax = plt.subplots()
-                ax.hist(arr,bins="fd")
+                ax.hist(arr,range=(0,1),rwidth=1.2)
                 plt.title('Target Distribution')
                 plt.xlabel('Target')
                 plt.ylabel('Density')

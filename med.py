@@ -310,7 +310,7 @@ if nav == "Prediction":
 
     st.subheader("Enter your Medical-details")
     sur = st.number_input("Number of Surgeries",0.0,10.0,step=1.0)
-    bp = st.number_input("Blood Pressure",90,200.0,step=0.5)
+    bp = st.number_input("Blood Pressure",90.0,200.0,step=0.5)
     col = st.number_input("Colestrol",100.0,350.0,step=1.0)
     bs = st.radio("Blood Sugar",["no","yes"])
     ecg = st.radio("ECG",["no","yes"])

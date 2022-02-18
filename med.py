@@ -314,7 +314,7 @@ if nav == "Prediction":
     col = st.number_input("Colestrol",100.0,350.0,step=1.0)
     bs = st.radio("Blood Sugar",["no","yes"])
     ecg = st.radio("ECG",["no","yes"])
-    mhr = st.number_input("Max. Heart Rate",30,200.0,step=1.0)
+    mhr = st.number_input("Max. Heart Rate",30.0,200.0,step=1.0)
     bf = st.radio("Bone Fracture",["no","yes"])
     
     if gen == 'male':

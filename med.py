@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np 
 import time
 from sklearn.linear_model import LinearRegression
-
+from sklearn.ensemble import GradientBoostingRegressor
 
 data = pd.read_csv("insurance.csv")
 md_df =pd.read_csv("medical report.csv")
@@ -367,15 +367,24 @@ if nav == "Prediction":
         medi = 0
     
     
-    data = (age,ling,bmi,child,medi,area)
-    regressor = LinearRegression()
-    regressor.fit(X,Y)
-    #changing input_data into numpy array
-    input_data_as_numpyArray = np.asarray(data)
-    # reshape the array
-    input_data_reshaped = input_data_as_numpyArray.reshape(1,-1)
-    # df = pd.DataFrame(input_data_reshaped,index=[0])
-    prediction = regressor.predict(input_data_reshaped)
+    data = {'age':age,'gender':ling,'bmi':bmi,'children':child,'medical':medi,'region':area}
+    df = pd.DataFrame(data,index=[0])
+    gr = GradientBoostingRegressor()
+    gr.fit(X,Y)
+    import joblib
+    joblib.dump(gr,'model_joblib_gr')
+    model = joblib.load('model_joblib_gr')
+    prediction = model.predict(df)
+
+    # data = (age,ling,bmi,child,medi,area)
+    # regressor = LinearRegression()
+    # regressor.fit(X,Y)
+    # #changing input_data into numpy array
+    # input_data_as_numpyArray = np.asarray(data)
+    # # reshape the array
+    # input_data_reshaped = input_data_as_numpyArray.reshape(1,-1)
+    # # df = pd.DataFrame(input_data_reshaped,index=[0])
+    # prediction = regressor.predict(input_data_reshaped)
     
 
     if st.button("Predict"):

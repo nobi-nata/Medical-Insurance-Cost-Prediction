@@ -304,7 +304,7 @@ if nav == "Prediction":
     age = st.number_input("Enter your Age",1.0,100.0,step=1.0)
     gen = st.radio("Select your Gender",["male","female"])
     bmi = st.number_input("Enter your BMI",0.0,50.0)
-    child = st.number_input("Enter number of Children",0.0,20.0)
+    child = st.number_input("Enter number of Children",0.0,4.0)
     reg = st.radio("Select your Region",["northwest","northeast","southeast","southwest"]) 
     
 
@@ -355,11 +355,7 @@ if nav == "Prediction":
     # reshape the array
     input_data_reshaped1 = input_data_as_numpyArray1.reshape(1,-1)
     med = LR.predict(input_data_reshaped1)
-    # if st.button("Check"):
-    #     if med == 0:
-    #         st.success("You are Medically Unfit")
-    #     else:
-    #         st.success("You are Medically Fit")
+    
 
     if med == 1:
         medi = 1
@@ -376,16 +372,6 @@ if nav == "Prediction":
     model = joblib.load('model_joblib_gr')
     prediction = model.predict(df)
 
-    # data = (age,ling,bmi,child,medi,area)
-    # regressor = LinearRegression()
-    # regressor.fit(X,Y)
-    # #changing input_data into numpy array
-    # input_data_as_numpyArray = np.asarray(data)
-    # # reshape the array
-    # input_data_reshaped = input_data_as_numpyArray.reshape(1,-1)
-    # # df = pd.DataFrame(input_data_reshaped,index=[0])
-    # prediction = regressor.predict(input_data_reshaped)
-    
 
     if st.button("Predict"):
         st.success(f"Predicted Medical Insurance Cost is : {prediction[0]} ")

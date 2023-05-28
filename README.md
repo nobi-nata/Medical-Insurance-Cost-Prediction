@@ -5,3 +5,8 @@
 2. Deployed on Render - Cloud based platform.
 
 3. Dataset is trained on various regression alogorithms like linear regression, logistic, random forest, gradient boosting, SVM and the best accuracy alogrithms is selected.
+
+
+# If want to run locally 
+1. Clone the repo 
+2. use streamlit run med.py

@@ -1,9 +1,9 @@
-.gitignore
+
 download.jpg
 data.py
 dataset-card.jpg
-Akshata/
-Certificate/
-CyberSecurity/
+/Akshata
+/Certificate
+/CyberSecurity
 insurance.csv
 .venv
